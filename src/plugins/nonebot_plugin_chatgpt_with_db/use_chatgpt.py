@@ -12,8 +12,10 @@ from nonebot.rule import to_me
 from nonebot.log import logger
 from pydantic import ValidationError
 
+from .models import ChatRecord
 from .types import ChatGptResponse
 
+DEBUG = False
 MAX_TOKENS = 4000
 PRICE_PER_TOKEN = 0.002 * 6.93 / 1000
 
@@ -59,13 +61,26 @@ class ChatGptHandler:
         try:
             await self.send("已收到您的消息，请稍候...")
             account = self.get_a_chat_account()
-            response = await self.get_response_of_chatgpt(account, event.get_plaintext())
 
-            content = response.choices[0].message.content.strip()
-            total_tokens = response.usage.total_tokens
+            if DEBUG:  # 用于本地调适 不便调用chatgpt接口时使用
+                content = f"you send: {event.get_plaintext()}"
+                total_tokens = len(f"{content}{event.get_plaintext()}")
+
+            else:
+                response = await self.get_response_of_chatgpt(account, event.get_plaintext())
+                content = response.choices[0].message.content.strip()
+                total_tokens = response.usage.total_tokens
+
             account.used_token += total_tokens
             price = PRICE_PER_TOKEN * total_tokens
             final_response_content = content + f"\n\n> {total_tokens} tokens: ¥{price:.5f}"
+
+            # 将本条消息消耗的token信息存入数据库
+            await ChatRecord.create(**{
+                "qq": event.sender.user_id,
+                "nickname": event.sender.nickname,
+                "token": total_tokens,
+            })
 
             logger.info(f"To {event.sender.user_id}: {final_response_content}")
             await self.send(final_response_content)
