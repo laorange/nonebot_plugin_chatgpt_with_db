@@ -10,6 +10,7 @@ from nonebot import on_message
 from nonebot.adapters.onebot.v11 import PrivateMessageEvent
 from nonebot.rule import to_me
 from nonebot.log import logger
+from pydantic import ValidationError
 
 from .types import ChatGptResponse
 
@@ -84,7 +85,10 @@ class ChatGptHandler:
             messages=[{"role": "user", "content": content}],  # role: "system", "assistant", "user",
             max_tokens=MAX_TOKENS)
 
-        return ChatGptResponse(**raw_response)
+        try:
+            return ChatGptResponse(**raw_response)
+        except ValidationError as e:
+            raise RuntimeError(f"This message didn't pass the pydantic: {raw_response}\n{e}")
 
 
 basic_handler = on_message(rule=to_me(), priority=9)
