@@ -12,12 +12,9 @@ from nonebot.rule import to_me
 from nonebot.log import logger
 from pydantic import ValidationError
 
+from .config import DEBUG, PRICE_PER_TOKEN, MAX_TOKENS
 from .models import ChatRecord
 from .types import ChatGptResponse
-
-DEBUG = False
-MAX_TOKENS = 4000
-PRICE_PER_TOKEN = 0.002 * 6.93 / 1000
 
 
 class ChatAccount:
