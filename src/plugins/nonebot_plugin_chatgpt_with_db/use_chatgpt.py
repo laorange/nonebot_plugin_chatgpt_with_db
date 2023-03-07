@@ -91,9 +91,9 @@ class ChatGptHandler:
 
         temperature = random() + 0.2  # between 0.2 and 1.2
 
-        if MODEL == "gpt-3.5-turbo":
+        if MODEL.startswith("gpt-3.5-turbo"):
             raw_response = await openai.ChatCompletion.acreate(
-                model="gpt-3.5-turbo",
+                model=MODEL,
                 temperature=temperature,
                 messages=[{"role": "user", "content": content}],  # role: "system", "assistant", "user",
                 max_tokens=MAX_TOKENS)

@@ -2,7 +2,7 @@ from typing import List, Literal, Optional
 
 import pydantic
 
-ModelCandidate = Literal["gpt-3.5-turbo", "text-davinci-003"]
+ModelCandidate = Literal["gpt-3.5-turbo", "gpt-3.5-turbo-0301",  "text-davinci-003"]
 
 
 class TokenUsage(pydantic.BaseModel):
