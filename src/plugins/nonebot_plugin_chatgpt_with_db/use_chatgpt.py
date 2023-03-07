@@ -49,7 +49,11 @@ class ChatGptHandler:
         self.matcher = matcher
 
     async def send(self, msg: str):
-        await self.matcher.send(msg)
+        if len(msg) < 2000:
+            await self.matcher.send(msg)
+        else:
+            await self.matcher.send(msg[:1500])
+            await self.send(msg[1500:])
 
     def get_a_chat_account(self) -> ChatAccount:
         return min(self.chat_accounts, key=lambda x: x.used_token)
