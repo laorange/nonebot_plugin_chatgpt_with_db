@@ -19,7 +19,7 @@ class GptTurboMessage(pydantic.BaseModel):
 class ResponseChoice(pydantic.BaseModel):
     message: Optional[GptTurboMessage]
     text: Optional[str]
-    finish_reason: Literal["stop", "length", "content_filter", "null"]
+    finish_reason: Optional[Literal["stop", "length", "content_filter"]]
     index: int
 
 
