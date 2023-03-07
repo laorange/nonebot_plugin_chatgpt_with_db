@@ -1,6 +1,8 @@
-from typing import List, Literal
+from typing import List, Literal, Optional
 
 import pydantic
+
+ModelCandidate = Literal["gpt-3.5-turbo", "text-davinci-003"]
 
 
 class TokenUsage(pydantic.BaseModel):
@@ -15,7 +17,8 @@ class GptTurboMessage(pydantic.BaseModel):
 
 
 class ResponseChoice(pydantic.BaseModel):
-    message: GptTurboMessage
+    message: Optional[GptTurboMessage]
+    text: Optional[str]
     finish_reason: Literal["stop", "length", "content_filter", "null"]
     index: int
 
@@ -27,6 +30,16 @@ class ChatGptResponse(pydantic.BaseModel):
     model: str
     usage: TokenUsage
     choices: List[ResponseChoice]
+
+    def get_content(self):
+        choice = self.choices[0]
+        if choice.message:
+            content = choice.message.content
+        elif choice.text:
+            content = choice.text
+        else:
+            content = "您似乎来到了内容的荒原..."
+        return content.strip()
 
 
 if __name__ == '__main__':
@@ -51,4 +64,18 @@ if __name__ == '__main__':
             "total_tokens": 32
         }
     }
-    print(ChatGptResponse(**test_response))
+
+    text_response2 = {"id": "xxx",
+                      "object": "text_completion",
+                      "created": 1678200628,
+                      "model": "text-davinci-003",
+                      "choices": [{
+                          "text": "xxx",
+                          "index": 0,
+                          "logprobs": None,
+                          "finish_reason": "stop"
+                      }],
+                      "usage": {"prompt_tokens": 2, "completion_tokens": 152, "total_tokens": 154}}
+
+    print(ChatGptResponse(**test_response).get_content())
+    print(ChatGptResponse(**text_response2).get_content())

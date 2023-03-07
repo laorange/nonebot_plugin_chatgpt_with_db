@@ -12,7 +12,7 @@ from nonebot.rule import to_me
 from nonebot.log import logger
 from pydantic import ValidationError
 
-from .config import DEBUG, PRICE_PER_TOKEN, MAX_TOKENS
+from .config import DEBUG, PRICE_PER_TOKEN, MAX_TOKENS, MODEL
 from .models import ChatRecord
 from .types import ChatGptResponse
 
@@ -65,7 +65,7 @@ class ChatGptHandler:
 
             else:
                 response = await self.get_response_of_chatgpt(account, event.get_plaintext())
-                content = response.choices[0].message.content.strip()
+                content = response.get_content()
                 total_tokens = response.usage.total_tokens
 
             account.used_token += total_tokens
@@ -91,11 +91,14 @@ class ChatGptHandler:
 
         temperature = random() + 0.2  # between 0.2 and 1.2
 
-        raw_response = await openai.ChatCompletion.acreate(
-            model="gpt-3.5-turbo",
-            temperature=temperature,
-            messages=[{"role": "user", "content": content}],  # role: "system", "assistant", "user",
-            max_tokens=MAX_TOKENS)
+        if MODEL == "gpt-3.5-turbo":
+            raw_response = await openai.ChatCompletion.acreate(
+                model="gpt-3.5-turbo",
+                temperature=temperature,
+                messages=[{"role": "user", "content": content}],  # role: "system", "assistant", "user",
+                max_tokens=MAX_TOKENS)
+        else:  # text-davinci-003
+            raw_response = await openai.Completion.acreate(model="text-davinci-003", prompt=content, temperature=temperature, max_tokens=MAX_TOKENS)
 
         try:
             return ChatGptResponse(**raw_response)
