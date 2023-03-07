@@ -1,3 +1,4 @@
+import traceback
 from pathlib import Path
 from random import random
 from typing import Union, Type, List
@@ -8,6 +9,7 @@ import openai
 from nonebot import on_message
 from nonebot.adapters.onebot.v11 import PrivateMessageEvent
 from nonebot.rule import to_me
+from nonebot.log import logger
 
 from .types import ChatGptResponse
 
@@ -26,7 +28,7 @@ def initialize_accounts() -> List[ChatAccount]:
     if api_keys_txt.exists():
         with api_keys_txt.open("rt", encoding="utf-8") as akt:
             accounts = [ChatAccount(api_key) for api_key in akt.readlines()]
-            print(f"当前有{len(accounts)}个账号；若需修改，请编辑或删除: {api_keys_txt}")
+            logger.info(f"当前有{len(accounts)}个账号；若需修改，请编辑或删除: {api_keys_txt}")
             return accounts
     else:
         api_keys = [input("请输入api key: ")]
@@ -62,8 +64,12 @@ class ChatGptHandler:
             total_tokens = response.usage.total_tokens
             account.used_token += total_tokens
             price = PRICE_PER_TOKEN * total_tokens
-            await self.send(content + f"\n\n> {total_tokens} tokens: ¥{price:.5f}")
+            final_response_content = content + f"\n\n> {total_tokens} tokens: ¥{price:.5f}"
+
+            logger.info(f"To {event.sender.user_id}: {final_response_content}")
+            await self.send(final_response_content)
         except Exception as e:
+            logger.error(traceback.format_exc())
             await self.send(f"{e}")
 
     @staticmethod
