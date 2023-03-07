@@ -12,6 +12,7 @@ from nonebot.internal.adapter import Event
 from nonebot.rule import to_me
 from loguru import logger
 
+from .dbapi import get_api_key, create_record
 from .secret import accounts
 
 
@@ -109,14 +110,22 @@ class ChatGptHandler:
             try:
                 print(f"start: {time.ctime()}")
                 start_time = time.perf_counter()
-                openai.api_key = account.api_key
+                bot_id, api_key = await get_api_key()
+                openai.api_key = api_key
+                print(api_key)
                 # full_response = openai.Completion.create(model="text-davinci-003", prompt=content, temperature=0, max_tokens=4000)
                 full_response = openai.Completion.acreate(model="text-davinci-003", prompt=content, temperature=0, max_tokens=4000)
                 print(json.dumps(full_response, ensure_ascii=False))
                 response = full_response.choices[0].text
                 print(f"end: {time.ctime()}, cost time: {time.perf_counter() - start_time}")
+                # record = {
+                #     "token": 123,
+                #     "qq_id": "",
+                #     "bot_id": ""
+                # }
+                # await create_record(record)
             except Exception as e:
-                return f"{e}"
+                return f"出错，{e}"
             return response.strip()
 
 
@@ -140,13 +149,13 @@ async def handle_first_receive(e: Event):
         await chatgpt_handler.reply(ew)
 
 
-if __name__ == '__main__':
-    import os
-    from pathlib import Path
-    import sys
-
-    os.environ["HOME"] = str(Path(sys.argv[0]).parent)
-
-    handler = ChatGptHandler(matcher=msg_handler)
-    promise = handler.get_response_of_chatgpt(handler.chat_accounts[0], "帮我写一个基于vue3的重置密码页面")
-    asyncio.run(promise)
+# if __name__ == '__main__':
+#     import os
+#     from pathlib import Path
+#     import sys
+#
+#     os.environ["HOME"] = str(Path(sys.argv[0]).parent)
+#
+#     handler = ChatGptHandler(matcher=msg_handler)
+#     promise = handler.get_response_of_chatgpt(handler.chat_accounts[0], "帮我写一个基于vue3的重置密码页面")
+#     asyncio.run(promise)

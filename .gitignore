@@ -142,3 +142,5 @@ dmypy.json
 
 .idea/
 go-cqhttp/
+
+db/
