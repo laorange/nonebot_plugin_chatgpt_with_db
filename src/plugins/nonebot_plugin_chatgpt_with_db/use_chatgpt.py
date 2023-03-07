@@ -6,7 +6,7 @@ from nonebot.internal.matcher import Matcher
 import openai
 
 from nonebot import on_message
-from nonebot.internal.adapter import Event
+from nonebot.adapters.onebot.v11 import PrivateMessageEvent
 from nonebot.rule import to_me
 
 from .types import ChatGptResponse
@@ -52,7 +52,7 @@ class ChatGptHandler:
     def get_a_chat_account(self) -> ChatAccount:
         return min(self.chat_accounts, key=lambda x: x.used_token)
 
-    async def handle_event(self, event: Event):
+    async def handle_event(self, event: PrivateMessageEvent):
         try:
             await self.send("已收到您的消息，请稍候...")
             account = self.get_a_chat_account()
@@ -86,6 +86,6 @@ chatgpt_handler = ChatGptHandler(matcher=basic_handler)
 
 
 @basic_handler.handle()
-async def handle_first_receive(e: Event):
+async def handle_first_receive(e: PrivateMessageEvent):
     if e.get_plaintext():
         await chatgpt_handler.handle_event(e)
