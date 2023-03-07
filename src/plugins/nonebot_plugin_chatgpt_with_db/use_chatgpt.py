@@ -108,6 +108,6 @@ chatgpt_handler = ChatGptHandler(matcher=basic_handler)
 
 
 @basic_handler.handle()
-async def handle_first_receive(e: PrivateMessageEvent):
+async def use_chatgpt(e: PrivateMessageEvent):
     if e.get_plaintext():
         await chatgpt_handler.handle_event(e)

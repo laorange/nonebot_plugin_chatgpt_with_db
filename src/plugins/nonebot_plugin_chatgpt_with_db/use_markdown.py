@@ -6,6 +6,6 @@ md_handler = on_regex("[Mm][Dd]", rule=to_me(), priority=8, block=True)
 
 
 @md_handler.handle()
-async def handle_first_receive(e: PrivateMessageEvent):
+async def use_markdown(e: PrivateMessageEvent):
     if e.get_plaintext():
         await md_handler.send("https://laorange.gitee.io/md")
