@@ -14,7 +14,7 @@ from pydantic import ValidationError
 
 from .config import DEBUG, PRICE_PER_TOKEN, MAX_TOKENS, MODEL
 from .models import ChatRecord
-from .types import ChatGptResponse
+from .util_types import ChatGptResponse
 
 
 class ChatAccount:

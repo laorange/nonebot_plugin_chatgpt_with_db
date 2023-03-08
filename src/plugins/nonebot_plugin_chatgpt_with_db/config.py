@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Extra
 
-from .types import ModelCandidate
+from .util_types import ModelCandidate
 
 DEBUG = False
 MODEL: ModelCandidate = "gpt-3.5-turbo-0301"
