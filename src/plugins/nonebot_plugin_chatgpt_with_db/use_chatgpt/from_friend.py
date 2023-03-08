@@ -1,3 +1,4 @@
+import asyncio
 import traceback
 from pathlib import Path
 
@@ -47,6 +48,7 @@ class ChatGptClient:
             await self.matcher.send(msg)
         else:
             await self.matcher.send(msg[:1500])
+            await asyncio.sleep(1)
             await self.send(msg[1500:])
 
     def get_a_chat_account(self) -> ChatAccount:
