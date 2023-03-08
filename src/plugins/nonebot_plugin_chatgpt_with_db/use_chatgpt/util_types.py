@@ -1,8 +1,16 @@
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Dict
 
 import pydantic
 
-ModelCandidate = Literal["gpt-3.5-turbo", "gpt-3.5-turbo-0301",  "text-davinci-003"]
+ModelCandidate = Literal["gpt-3.5-turbo", "gpt-3.5-turbo-0301", "text-davinci-003"]
+
+LongChatCache = Dict[str, str]
+
+
+class ChatAccount:
+    def __init__(self, api_key: str):
+        self.api_key = api_key
+        self.used_token = 0
 
 
 class TokenUsage(pydantic.BaseModel):
@@ -56,7 +64,7 @@ if __name__ == '__main__':
         ],
         "created": 1678179225,
         "id": "chat-xxxx",
-        "model": "gpt-3.5-turbo-0301",
+        "model": "gpt-3.5-turbo",
         "object": "chat.completion",
         "usage": {
             "completion_tokens": 21,

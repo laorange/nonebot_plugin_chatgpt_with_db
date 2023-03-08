@@ -1,26 +1,19 @@
 import traceback
 from pathlib import Path
-from random import random
+
 from typing import Union, Type, List
 
 from nonebot.internal.matcher import Matcher
-import openai
 
 from nonebot import on_message
 from nonebot.adapters.onebot.v11 import PrivateMessageEvent
 from nonebot.rule import to_me
 from nonebot.log import logger
-from pydantic import ValidationError
 
-from .config import DEBUG, PRICE_PER_TOKEN, MAX_TOKENS, MODEL
-from .models import ChatRecord
-from .util_types import ChatGptResponse
-
-
-class ChatAccount:
-    def __init__(self, api_key: str):
-        self.api_key = api_key
-        self.used_token = 0
+from ..config import DEBUG, PRICE_PER_TOKEN, DEFAULT_MODEL
+from ..models import ChatRecord
+from .get_response_of_chatgpt import get_response_of_chatgpt
+from .util_types import ChatAccount, ModelCandidate
 
 
 def initialize_accounts() -> List[ChatAccount]:
@@ -43,10 +36,11 @@ def initialize_accounts() -> List[ChatAccount]:
         return [ChatAccount(api_key) for api_key in api_keys if api_key]
 
 
-class ChatGptHandler:
-    def __init__(self, matcher: Union[Matcher, Type[Matcher]]):
+class ChatGptClient:
+    def __init__(self, matcher: Union[Matcher, Type[Matcher]], model: ModelCandidate = "gpt-3.5-turbo-0301"):
         self.chat_accounts = initialize_accounts()
         self.matcher = matcher
+        self.model = model
 
     async def send(self, msg: str):
         if len(msg) < 2000:
@@ -72,7 +66,7 @@ class ChatGptHandler:
                 total_tokens = len(f"{content}{question_text}")
 
             else:
-                response = await self.get_response_of_chatgpt(account, question_text)
+                response = await get_response_of_chatgpt(DEFAULT_MODEL, account, question_text)
                 content = response.get_content()
                 total_tokens = response.usage.total_tokens
 
@@ -93,34 +87,12 @@ class ChatGptHandler:
             logger.error(traceback.format_exc())
             await self.send(f"{e}")
 
-    @staticmethod
-    async def get_response_of_chatgpt(account: ChatAccount, content: str) -> ChatGptResponse:
-        openai.api_key = account.api_key
-
-        temperature = random() + 0.2  # between 0.2 and 1.2
-
-        left_max_tokens = MAX_TOKENS - len(content) * 1.5
-
-        if MODEL.startswith("gpt-3.5-turbo"):
-            raw_response = await openai.ChatCompletion.acreate(
-                model=MODEL,
-                temperature=temperature,
-                messages=[{"role": "user", "content": content}],  # role: "system", "assistant", "user",
-                max_tokens=left_max_tokens)
-        else:  # text-davinci-003
-            raw_response = await openai.Completion.acreate(model="text-davinci-003", prompt=content, temperature=temperature, max_tokens=left_max_tokens)
-
-        try:
-            return ChatGptResponse(**raw_response)
-        except ValidationError as e:
-            raise RuntimeError(f"This message didn't pass the pydantic: {raw_response}\n{e}")
-
 
 basic_handler = on_message(rule=to_me(), priority=9)
-chatgpt_handler = ChatGptHandler(matcher=basic_handler)
+chatgpt_client = ChatGptClient(matcher=basic_handler)
 
 
 @basic_handler.handle()
 async def use_chatgpt(e: PrivateMessageEvent):
     if e.get_plaintext():
-        await chatgpt_handler.handle_event(e)
+        await chatgpt_client.handle_event(e)

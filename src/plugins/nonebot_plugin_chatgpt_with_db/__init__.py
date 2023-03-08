@@ -5,7 +5,7 @@ from .models import init_database_sync
 from .use_chatgpt import *
 from .use_markdown import *
 from .use_query_database import *
-from .auto_add_friend import *
+from .use_auto_add_friend import *
 from .use_help import *
 
 global_config = get_driver().config
