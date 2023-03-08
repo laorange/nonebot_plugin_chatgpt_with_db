@@ -59,16 +59,20 @@ class ChatGptHandler:
         return min(self.chat_accounts, key=lambda x: x.used_token)
 
     async def handle_event(self, event: PrivateMessageEvent):
+        question_text = event.get_plaintext()
+        if (question_len := len(question_text)) >= 2000:
+            return await self.send(f"您的问题过长({question_len}个字符)。由于语言模型限制，问题与回答的长度是有上限的，请将问题控制在2000个字符以内")
+
         try:
             await self.send("已收到您的消息，请稍候...")
             account = self.get_a_chat_account()
 
             if DEBUG:  # 用于本地调适 不便调用chatgpt接口时使用
-                content = f"you send: {event.get_plaintext()}"
-                total_tokens = len(f"{content}{event.get_plaintext()}")
+                content = f"you send: {question_text}"
+                total_tokens = len(f"{content}{question_text}")
 
             else:
-                response = await self.get_response_of_chatgpt(account, event.get_plaintext())
+                response = await self.get_response_of_chatgpt(account, question_text)
                 content = response.get_content()
                 total_tokens = response.usage.total_tokens
 
@@ -95,14 +99,16 @@ class ChatGptHandler:
 
         temperature = random() + 0.2  # between 0.2 and 1.2
 
+        left_max_tokens = MAX_TOKENS - len(content) * 1.5
+
         if MODEL.startswith("gpt-3.5-turbo"):
             raw_response = await openai.ChatCompletion.acreate(
                 model=MODEL,
                 temperature=temperature,
                 messages=[{"role": "user", "content": content}],  # role: "system", "assistant", "user",
-                max_tokens=MAX_TOKENS)
+                max_tokens=left_max_tokens)
         else:  # text-davinci-003
-            raw_response = await openai.Completion.acreate(model="text-davinci-003", prompt=content, temperature=temperature, max_tokens=MAX_TOKENS)
+            raw_response = await openai.Completion.acreate(model="text-davinci-003", prompt=content, temperature=temperature, max_tokens=left_max_tokens)
 
         try:
             return ChatGptResponse(**raw_response)
