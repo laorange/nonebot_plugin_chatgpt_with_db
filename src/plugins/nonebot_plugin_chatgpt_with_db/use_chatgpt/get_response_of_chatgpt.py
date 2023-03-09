@@ -1,3 +1,4 @@
+import re
 from random import random
 
 import openai
@@ -12,7 +13,9 @@ async def get_response_of_chatgpt(model: ModelCandidate, account: ChatAccount, c
 
     temperature = random() + 0.2  # between 0.2 and 1.2
 
-    left_max_tokens = int(MAX_TOKENS - len(content) * 1.5)
+    alphanumeric_length = len(re.findall(r'[a-zA-Z0-9]', content))
+    non_alphanumeric_length = len(content) - alphanumeric_length
+    left_max_tokens = MAX_TOKENS - alphanumeric_length - non_alphanumeric_length * 2
 
     if model.startswith("gpt-3.5-turbo"):
         raw_response = await openai.ChatCompletion.acreate(
@@ -20,8 +23,10 @@ async def get_response_of_chatgpt(model: ModelCandidate, account: ChatAccount, c
             temperature=temperature,
             messages=[{"role": "user", "content": content}],  # role: "system", "assistant", "user",
             max_tokens=left_max_tokens)
-    else:  # text-davinci-003
-        raw_response = await openai.Completion.acreate(model="text-davinci-003", prompt=content, temperature=temperature, max_tokens=left_max_tokens)
+    elif model.startswith("text-davinci-003"):
+        raw_response = await openai.Completion.acreate(model=model, prompt=content, temperature=temperature, max_tokens=left_max_tokens)
+    else:
+        raise NotImplementedError(f"暂不支持该模型：{model}")
 
     try:
         return ChatGptResponse(**raw_response)
