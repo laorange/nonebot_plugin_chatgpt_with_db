@@ -5,6 +5,7 @@ from nonebot.adapters.onebot.v11 import PrivateMessageEvent
 from nonebot.rule import to_me
 from tortoise.functions import Sum
 
+from .use_chatgpt import TempChatWrapper
 from .config import PRICE_PER_TOKEN
 from .models import ChatRecord
 
@@ -37,4 +38,5 @@ async def get_query_msg_of_qq_id(qq_id: str):
 
 @query_db_handler.handle()
 async def use_query_database(e: PrivateMessageEvent):
-    await query_db_handler.send(await get_query_msg_of_qq_id(e.get_user_id()))
+    with TempChatWrapper(query_db_handler, e.sub_type == "group") as matcher:
+        await matcher.send(await get_query_msg_of_qq_id(e.get_user_id()))
