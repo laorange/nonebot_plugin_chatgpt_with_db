@@ -40,13 +40,14 @@ class FromTempChatHandler(FromFriendHandler):
 
             if len(msg) < 2000:
                 await matcher.send(msg)
+                long_chat_cache[user_id] = ""
             else:
                 to_send_msg = msg[:1500]
                 to_send_msg += f"\n\n(本回答仍有{len(msg) - 1500}字未发送，请回复任意文本来获取下一段)"
 
                 long_chat_cache[user_id] = msg[1500:]
 
-                await matcher.send(to_send_msg)
+                await self.send(user_id, to_send_msg)
 
     async def handle_event(self, event: PrivateMessageEvent):
         user_id = event.get_user_id()
