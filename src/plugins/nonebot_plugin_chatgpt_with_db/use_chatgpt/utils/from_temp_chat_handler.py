@@ -3,6 +3,7 @@ from typing import Type
 
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import PrivateMessageEvent
+from nonebot.exception import FinishedException
 from nonebot.internal.matcher import Matcher
 
 from .types import LongChatCache
@@ -20,9 +21,16 @@ class TempChatWrapper:
         return self.matcher
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if not (self.ignore_action_failed and exc_type.__name__ == "ActionFailed"):
-            logger.error(traceback.format_exc())
-        return True  # 返回值为True，不再传播异常
+        if exc_val is None:  # 没有异常 直接返回
+            return False
+
+        if exc_type == FinishedException:  # nonebot 正常流程中的 FinishedException 应直接正常抛出
+            return False
+
+        if self.ignore_action_failed and exc_type.__name__ == "ActionFailed":  # 忽略ActionFailed
+            return True
+
+        return False  # 其余情况 继续向上抛出异常
 
 
 class FromTempChatHandler(FromFriendHandler):
