@@ -3,7 +3,6 @@ from typing import Type
 
 from nonebot import logger
 from nonebot.adapters.onebot.v11 import PrivateMessageEvent
-from nonebot.exception import ActionFailed
 from nonebot.internal.matcher import Matcher
 
 from .types import LongChatCache
@@ -21,8 +20,9 @@ class TempChatWrapper:
         return self.matcher
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        if not (self.ignore_action_failed and isinstance(exc_val, ActionFailed)):
+        if not (self.ignore_action_failed and exc_type.__name__ == "ActionFailed"):
             logger.error(traceback.format_exc())
+        return True  # 返回值为True，不再传播异常
 
 
 class FromTempChatHandler(FromFriendHandler):
@@ -44,14 +44,11 @@ class FromTempChatHandler(FromFriendHandler):
         user_id = event.get_user_id()
 
         if cache := long_chat_cache.get(user_id, None):
-            await self.send(user_id, cache)
+            return await self.send(user_id, cache)
 
         try:
             await self.reject_too_long_question(event)
             await self.reply_event(event)
-        except ActionFailed:
-            if event.sub_type != "group":  # 忽略回复 群的临时会话信息 的报错
-                logger.error(traceback.format_exc())
         except Exception as e:
             logger.error(traceback.format_exc())
             await self.send(user_id, f"{e}")
