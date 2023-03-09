@@ -6,11 +6,11 @@ from nonebot.adapters.onebot.v11 import PrivateMessageEvent
 from nonebot.internal.matcher import Matcher
 from nonebot.log import logger
 
-from src.plugins.nonebot_plugin_chatgpt_with_db.models import ChatRecord
-from src.plugins.nonebot_plugin_chatgpt_with_db.config import DEBUG, PRICE_PER_TOKEN, DEFAULT_MODEL
-from src.plugins.nonebot_plugin_chatgpt_with_db.use_chatgpt.initialize_accounts import chat_accounts
-from src.plugins.nonebot_plugin_chatgpt_with_db.use_chatgpt.get_response_of_chatgpt import get_response_of_chatgpt
-from src.plugins.nonebot_plugin_chatgpt_with_db.use_chatgpt.util_types import ChatAccount, ModelCandidate
+from ...models import ChatRecord
+from ...config import DEBUG, PRICE_PER_TOKEN, DEFAULT_MODEL
+from .initialize_accounts import chat_accounts
+from .get_response_of_chatgpt import get_response_of_chatgpt
+from .types import ChatAccount, ModelCandidate
 
 
 class FromFriendHandler:

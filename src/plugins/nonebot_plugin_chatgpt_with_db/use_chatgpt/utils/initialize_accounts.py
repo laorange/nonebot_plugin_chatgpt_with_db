@@ -3,7 +3,7 @@ from typing import List
 
 from nonebot import logger
 
-from .util_types import ChatAccount
+from .types import ChatAccount
 
 
 def initialize_accounts() -> List[ChatAccount]:

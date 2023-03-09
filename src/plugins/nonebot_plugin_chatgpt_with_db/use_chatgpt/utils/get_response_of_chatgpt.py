@@ -4,8 +4,8 @@ from random import random
 import openai
 from pydantic import ValidationError
 
-from .util_types import ChatAccount, ChatGptResponse, ModelCandidate
-from ..config import MAX_TOKENS, OVER_BUFFERING
+from .types import ChatAccount, ChatGptResponse, ModelCandidate
+from ...config import MAX_TOKENS, OVER_BUFFERING
 
 
 async def get_response_of_chatgpt(model: ModelCandidate, account: ChatAccount, content: str) -> ChatGptResponse:

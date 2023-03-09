@@ -6,8 +6,8 @@ from nonebot.adapters.onebot.v11 import PrivateMessageEvent
 from nonebot.exception import ActionFailed
 from nonebot.internal.matcher import Matcher
 
-from src.plugins.nonebot_plugin_chatgpt_with_db.use_chatgpt.util_types import LongChatCache
-from src.plugins.nonebot_plugin_chatgpt_with_db.use_chatgpt.utils.from_friend_handler import FromFriendHandler
+from .types import LongChatCache
+from .from_friend_handler import FromFriendHandler
 
 long_chat_cache: LongChatCache = {}
 
