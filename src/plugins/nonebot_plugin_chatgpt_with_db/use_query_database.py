@@ -25,11 +25,11 @@ async def get_query_msg_of_qq_id(qq_id: str):
     month_times, month_tokens, month_price = await query_data(after=today - datetime.timedelta(days=30))
     total_times, total_tokens, total_price = await query_data(after=None)
 
-    msg = f"程序调用ChatGPT官方接口，每1000个token成本为{round(PRICE_PER_TOKEN * 1000, 5)}元\n\n"
+    msg = f"程序调用ChatGPT官方接口，每1000个token成本为 {round(PRICE_PER_TOKEN * 1000, 5)} ​元\n\n"
     msg += "以下是您查询量，可供参考：\n\n"
-    msg += f"过去7天: {week_times}次查询，{week_tokens} tokens ({week_price}元)\n\n"
-    msg += f"过去30天: {month_times}次查询，{month_tokens} tokens (¥{month_price}元)\n\n" if week_times != month_times else ""
-    msg += f"历史总计: {total_times}次查询，{total_tokens} tokens (¥{total_price}元)\n\n" if month_times != total_times else ""
+    msg += f"过去7天: {week_times}次查询，{week_tokens} tokens ( {week_price} ​元)\n\n"
+    msg += f"过去30天: {month_times}次查询，{month_tokens} tokens ( {month_price} ​元)\n\n" if week_times != month_times else ""
+    msg += f"历史总计: {total_times}次查询，{total_tokens} tokens ( {total_price} ​元)\n\n" if month_times != total_times else ""
     msg += "🥰希望能得到您的理解与支持"
 
     return msg
