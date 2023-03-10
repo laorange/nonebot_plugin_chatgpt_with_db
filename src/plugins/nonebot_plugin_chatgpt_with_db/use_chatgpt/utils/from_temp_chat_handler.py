@@ -9,8 +9,6 @@ from nonebot.internal.matcher import Matcher
 from .types import LongChatCache
 from .from_friend_handler import FromFriendHandler
 
-long_chat_cache: LongChatCache = {}
-
 
 class TempChatWrapper:
     def __init__(self, matcher: Type[Matcher], ignore_action_failed: bool = True):
@@ -34,25 +32,27 @@ class TempChatWrapper:
 
 
 class FromTempChatHandler(FromFriendHandler):
+    long_chat_cache: LongChatCache = {}
+
     async def send(self, user_id: str, msg: str):
         with TempChatWrapper(self.matcher) as matcher:
             logger.info(f"To {user_id}: {msg}")
 
             if len(msg) < 2000:
+                self.long_chat_cache[user_id] = ""
                 await matcher.send(msg)
-                long_chat_cache[user_id] = ""
             else:
                 to_send_msg = msg[:1500]
                 to_send_msg += f"\n\n(本回答仍有{len(msg) - 1500}字未发送，请回复任意文本来获取下一段)"
 
-                long_chat_cache[user_id] = msg[1500:]
+                self.long_chat_cache[user_id] = msg[1500:]
 
-                await self.send(user_id, to_send_msg)
+                await matcher.send(to_send_msg)
 
     async def handle_event(self, event: PrivateMessageEvent):
         user_id = event.get_user_id()
 
-        if cache := long_chat_cache.get(user_id, None):
+        if cache := self.long_chat_cache.get(user_id, None):
             return await self.send(user_id, cache)
 
         try:
