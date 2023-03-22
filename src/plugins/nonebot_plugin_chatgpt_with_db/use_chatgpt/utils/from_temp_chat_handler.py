@@ -34,6 +34,10 @@ class TempChatWrapper:
 class FromTempChatHandler(FromFriendHandler):
     long_chat_cache: LongChatCache = {}
 
+    async def reject_too_long_question(self, event: PrivateMessageEvent):
+        with TempChatWrapper(self.matcher):
+            await super().reject_too_long_question(event)
+
     async def send(self, user_id: str, msg: str):
         with TempChatWrapper(self.matcher) as matcher:
             logger.info(f"To {user_id}: {msg}")

@@ -34,7 +34,7 @@ class FromFriendHandler:
     async def reject_too_long_question(self, event: PrivateMessageEvent):
         question_text = event.get_plaintext()
         if (question_len := len(question_text)) >= 2000:
-            return await self.send(event.get_user_id(), f"您的问题过长({question_len}个字符)。由于语言模型限制，问题与回答的长度是有上限的，请将问题控制在2000个字符以内")
+            await self.matcher.finish(f"您的问题过长({question_len}个字符)。由于语言模型限制，问题与回答的长度是有上限的，请将问题控制在2000个字符以内")
 
     async def reply_event(self, event: PrivateMessageEvent):
         question_text = event.get_plaintext()
