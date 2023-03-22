@@ -67,7 +67,6 @@ class FromFriendHandler:
     async def handle_event(self, event: PrivateMessageEvent):
         try:
             await self.reject_too_long_question(event)
-            await self.send(event.get_user_id(), "已收到您的消息，请稍候...")
             await self.reply_event(event)
         except Exception as e:
             logger.error(traceback.format_exc())
