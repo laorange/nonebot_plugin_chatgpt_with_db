@@ -10,7 +10,7 @@ from nonebot.log import logger, default_format
 logger.add("nonebot.log",
            rotation="00:00",
            diagnose=False,
-           level="DEBUG",
+           level="INFO",
            format=default_format)
 
 # You can pass some keyword args config to init function
