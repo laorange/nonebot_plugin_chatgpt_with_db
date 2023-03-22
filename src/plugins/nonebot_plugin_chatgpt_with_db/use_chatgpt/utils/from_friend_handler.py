@@ -52,8 +52,7 @@ class FromFriendHandler:
 
         account.used_token += total_tokens
 
-        price = PRICE_PER_TOKEN * total_tokens
-        final_response_content = content + f"\n\n> {total_tokens} tokens: {price:.5f} ​元"
+        final_response_content = content + f"\n\n> 共计 {total_tokens} tokens"
 
         # 将本条消息消耗的token信息存入数据库
         await ChatRecord.create(**{

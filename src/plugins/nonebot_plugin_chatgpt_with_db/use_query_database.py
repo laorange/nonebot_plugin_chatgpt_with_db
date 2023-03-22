@@ -6,7 +6,7 @@ from nonebot.rule import to_me
 from tortoise.functions import Sum
 
 from .use_chatgpt import TempChatWrapper
-from .config import PRICE_PER_TOKEN
+from .config import PRICE_PER_TOKEN, PRICE_PER_1K_TOKEN_USD, EXCHANGE_RATE
 from .models import ChatRecord
 
 query_db_handler = on_fullmatch('查询', rule=to_me(), priority=8, block=True)
@@ -26,12 +26,14 @@ async def get_query_msg_of_qq_id(qq_id: str):
     month_times, month_tokens, month_price = await query_data(after=today - datetime.timedelta(days=30))
     total_times, total_tokens, total_price = await query_data(after=None)
 
-    msg = f"程序调用ChatGPT官方接口，每1000个token成本为 {round(PRICE_PER_TOKEN * 1000, 5)} ​元\n\n"
+    price_per_1k_token = round(PRICE_PER_TOKEN * 1000, 5)
+
+    msg = f"开发者调用ChatGPT官方接口，每1000个token成本为{PRICE_PER_1K_TOKEN_USD} * {EXCHANGE_RATE} = {price_per_1k_token}\n\n"
     msg += "以下是您查询量，可供参考：\n\n"
-    msg += f"过去7天: {week_times}次查询，{week_tokens} tokens ( {week_price} ​元)\n\n"
-    msg += f"过去30天: {month_times}次查询，{month_tokens} tokens ( {month_price} ​元)\n\n" if week_times != month_times else ""
-    msg += f"历史总计: {total_times}次查询，{total_tokens} tokens ( {total_price} ​元)\n\n" if month_times != total_times else ""
-    msg += "🥰希望能得到您的理解与支持"
+    msg += f"过去7天: {week_times}次查询，{week_tokens} tokens ( {week_price} )\n\n"
+    msg += f"过去30天: {month_times}次查询，{month_tokens} tokens ( {month_price} )\n\n" if week_times != month_times else ""
+    msg += f"历史总计: {total_times}次查询，{total_tokens} tokens ( {total_price} )\n\n" if month_times != total_times else ""
+    msg += "除此以外，服务器租用和维护也有成本。若本项目对您有所帮助，希望能得到您的理解与支持🥰"
 
     return msg
 
